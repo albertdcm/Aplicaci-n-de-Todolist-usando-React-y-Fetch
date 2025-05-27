@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 
-const API_URL = "https://playground.4geeks.com/todo/users";
+const API_BASE = "https://playground.4geeks.com/todo";
 const USERNAME = "webdev_todolist_user";
 
 const Home = () => {
@@ -10,24 +10,25 @@ const Home = () => {
 
   useEffect(() => {
     createUser();
-    fetchTodos();
   }, []);
 
   const createUser = async () => {
     try {
-      await fetch(`${API_URL}/${USERNAME}`, {
+      await fetch(`${API_BASE}/users/${USERNAME}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify([]),
       });
     } catch (error) {
-      console.error("Usuario ya existe o error al crearlo.", error);
+      console.log("Usuario ya existe o error:", error);
+    } finally {
+      fetchTodos();
     }
   };
 
   const fetchTodos = async () => {
     try {
-      const res = await fetch(`${API_URL}/${USERNAME}`);
+      const res = await fetch(`${API_BASE}/users/${USERNAME}`);
       const data = await res.json();
       setTodos(data.todos || []);
     } catch (error) {
@@ -37,30 +38,44 @@ const Home = () => {
 
   const addTodo = async (label) => {
     if (!label.trim()) return;
-    const updatedTodos = [...todos, { label, done: false }];
-    await updateTodosOnServer(updatedTodos);
-    setInput("");
+
+    const task = { label: label.trim(), done: false };
+
+    try {
+      await fetch(`${API_BASE}/todos/${USERNAME}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task)
+      });
+      fetchTodos();
+      setInput("");
+    } catch (error) {
+      console.error("Error al agregar tarea:", error);
+    }
   };
 
   const deleteTodo = async (index) => {
-    const updatedTodos = todos.filter((_, i) => i !== index);
-    await updateTodosOnServer(updatedTodos);
-  };
+    const taskId = todos[index]?.id;
+    if (!taskId) return;
 
-  const clearTodos = async () => {
-    await updateTodosOnServer([]);
-  };
-
-  const updateTodosOnServer = async (updatedTodos) => {
     try {
-      await fetch(`${API_URL}/${USERNAME}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTodos),
+      await fetch(`${API_BASE}/todos/${taskId}`, {
+        method: "DELETE"
       });
       fetchTodos();
     } catch (error) {
-      console.error("Error al actualizar tareas.", error);
+      console.error("Error al eliminar tarea:", error);
+    }
+  };
+
+  const clearTodos = async () => {
+    try {
+      await fetch(`${API_BASE}/users/${USERNAME}`, {
+        method: "DELETE"
+      });
+      createUser(); // recrea el usuario limpio
+    } catch (error) {
+      console.error("Error al limpiar tareas:", error);
     }
   };
 
@@ -74,16 +89,27 @@ const Home = () => {
             placeholder="What needs to be done?"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addTodo(input)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && input.trim()) {
+                addTodo(input);
+              }
+            }}
           />
-          <button className="add-btn" onClick={() => addTodo(input)}>Add</button>
+          <button
+            className="add-btn"
+            onClick={() => input.trim() && addTodo(input)}
+          >
+            Add
+          </button>
         </div>
+
         {todos.map((item, i) => (
           <div key={i} className="todo-item">
             {item.label}
             <button onClick={() => deleteTodo(i)}>x</button>
           </div>
         ))}
+
         <div className="footer">
           <small>{todos.length} item{todos.length !== 1 ? "s" : ""} left</small>
           <button className="clear-btn" onClick={clearTodos}>Clear All</button>

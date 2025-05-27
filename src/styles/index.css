@@ -23,14 +23,19 @@ body {
 
 .todo-box {
   background: white;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
-              0 25px 50px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+              0 25px 50px rgba(0, 0, 0, 0.1);
   width: 400px;
   padding: 0;
   border-radius: 8px;
 }
 
-.todo-box input {
+.input-wrapper {
+  display: flex;
+  border-bottom: 1px solid #eee;
+}
+
+.input-wrapper input {
   width: 100%;
   padding: 15px;
   border: none;
@@ -39,9 +44,24 @@ body {
   outline: none;
 }
 
+.add-btn {
+  padding: 0 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-btn:hover {
+  background: #45a049;
+}
+
 .todo-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 15px;
   border-top: 1px solid #eee;
   font-size: 18px;
@@ -53,6 +73,11 @@ body {
   color: #cc9a9a;
   font-size: 16px;
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.todo-item button:hover {
+  color: red;
 }
 
 .footer {
@@ -69,20 +94,9 @@ body {
   color: #cc9a9a;
   cursor: pointer;
   font-size: 14px;
-}
-.input-wrapper {
-  display: flex;
+  transition: color 0.2s;
 }
 
-.add-btn {
-  padding: 0 16px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.add-btn:hover {
-  background: #45a049;
+.clear-btn:hover {
+  color: red;
 }
